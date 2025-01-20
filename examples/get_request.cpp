@@ -1,4 +1,7 @@
 #include <cpp20_http_client.hpp>
+#include "Response.hpp"
+#include "exceptions.hpp"
+#include "UrlComponents.hpp"
 
 using namespace std::string_view_literals;
 

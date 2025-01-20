@@ -23,6 +23,8 @@ SOFTWARE.
 */
 
 #include "cpp20_http_client.hpp"
+#include "Socket.hpp"
+#include "exceptions.hpp"
 
 //---------------------------------------------------------
 
@@ -84,13 +86,6 @@ namespace http_client {
 
 // Platform-specific utilities.
 namespace utils {
-
-void enable_utf8_console() {
-#ifdef _WIN32
-	SetConsoleOutputCP(CP_UTF8);
-#endif
-	// Pretty much everyone else uses utf-8 by default.
-}
 
 #ifdef _WIN32
 namespace win {
@@ -224,7 +219,7 @@ void throw_connection_error(
 
 [[noreturn]]
 void throw_connection_error(std::string reason, int const error_code = errno, bool const is_tls_error = false) {
-	throw errors::ConnectionFailed{
+	throw ConnectionFailed{
 		std::format("{} with code {}: {}", reason, error_code, std::generic_category().message(error_code)), 
 		is_tls_error
 	};
@@ -1100,7 +1095,7 @@ private:
 				&address_info
 			))
 		{
-			throw errors::ConnectionFailed{
+			throw ConnectionFailed{
 				std::format("Failed to get address info for socket creation: {}", gai_strerror(result))
 			};
 		}
@@ -1226,7 +1221,7 @@ private:
 	using TlsConnection = std::unique_ptr<SSL, decltype([](auto const x){ ::SSL_free(x); })>;
 
 	static void throw_tls_error_() {
-		throw errors::ConnectionFailed{utils::unix::get_openssl_error_string(), true};
+		throw ConnectionFailed{utils::unix::get_openssl_error_string(), true};
 	}
 
 	void ensure_connected_() {

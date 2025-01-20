@@ -1,4 +1,7 @@
 #include <cpp20_http_client.hpp>
+#include "Response.hpp"
+#include "ResponseProgress.hpp"
+#include "RequestMethod.hpp"
 
 void handle_progress(http_client::ResponseProgressRaw const& progress) {
 	std::cout << "Received " << progress.data.size() << " bytes.\n";

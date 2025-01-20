@@ -1,4 +1,6 @@
 #include <cpp20_http_client.hpp>
+#include "Response.hpp"
+#include "ResponseProgress.hpp"
 
 using namespace std::chrono_literals;
 
