@@ -1,41 +1,6 @@
-/**
-* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at https://mozilla.org/MPL/2.0/.
-*
-* \copyright   Copyright 2025 RSP Systems A/S. All rights reserved.
-* \license     Mozilla Public License 2.0
-* \author      steffen
-*/
 #ifndef CPP20HTTPCLIENT_SOURCE_CPP20_HTTP_CLIENT_CPP_URL_COMPONENTS_HPP
 #define CPP20HTTPCLIENT_SOURCE_CPP20_HTTP_CLIENT_CPP_URL_COMPONENTS_HPP
 
-#include "template-helpers.hpp"
-#include "Protocol.hpp"
-#include "RequestMethod.hpp"
-#include "Request.hpp"
-#include "ResponseProgress.hpp"
-#include "Response.hpp"
-#include "ChunkyBodyParser.hpp"
-#include <version>
-#include <variant>
-#include <thread>
-#include <string_view>
-#include <string>
-#include <stdexcept>
-#include <span>
-#include <ranges>
-#include <memory>
-#include <iostream>
-#include <future>
-#include <functional>
-#include <fstream>
-#include <format>
-#include <concepts>
-#include <chrono>
-#include <charconv>
-#include <array>
-#include <algorithm>
 
 namespace http_client::utils {
 
@@ -98,7 +63,7 @@ inline UrlComponents split_url(std::string_view const url) noexcept {
 
 	auto result = UrlComponents{};
 
-	constexpr auto whitespace_characters = " \t\r\n"operator;
+	constexpr auto whitespace_characters = " \t\r\n"sv;
 
 	// Find the start position of the protocol.
 	auto start_position = url.find_first_not_of(whitespace_characters);
@@ -106,7 +71,7 @@ inline UrlComponents split_url(std::string_view const url) noexcept {
 		return {};
 	}
 
-	constexpr auto protocol_suffix = "://"operator;
+	constexpr auto protocol_suffix = "://"sv;
 
 	// Find the end position of the protocol.
 	if (auto const position = url.find(protocol_suffix, start_position);
@@ -143,7 +108,7 @@ inline UrlComponents split_url(std::string_view const url) noexcept {
 			result.port = *port;
 		}
 
-		result.path = "/"operator;
+		result.path = "/"sv;
 		return result;
 	}
 

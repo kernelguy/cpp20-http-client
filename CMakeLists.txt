@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.18.0)
-project(Cpp20HttpClient VERSION 2.1.1 LANGUAGES CXX)
+project(Cpp20HttpClient VERSION 3.0.1 LANGUAGES CXX)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin/)
@@ -9,6 +9,8 @@ option(CPP20_HTTP_CLIENT_BUILD_EXAMPLES "Set to OFF to not build examples" ON)
 option(CPP20_HTTP_CLIENT_BUILD_TESTS "Set to OFF to not build tests" ON)
 option(CPP20_HTTP_CLIENT_ENABLE_INSTALL "Generate the install target" ON)
 
+set (CMAKE_CXX_STANDARD 23)
+
 #-----------------------------
 # Library target.
 
@@ -17,13 +19,13 @@ add_library(Cpp20HttpClient::cpp20_http_client ALIAS cpp20_http_client)
 
 set_target_properties(cpp20_http_client PROPERTIES CXX_EXTENSIONS OFF)
 
-if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
-	add_compile_options(/utf-8)
-	# Concepts are (or were) only available in /std:c++latest, not in /std:c++20
-	target_compile_options(cpp20_http_client PUBLIC /std:c++latest)
-else ()
-	target_compile_features(cpp20_http_client PUBLIC cxx_std_20)
-endif ()
+#if (${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
+#	add_compile_options(/utf-8)
+#	# Concepts are (or were) only available in /std:c++latest, not in /std:c++20
+#	target_compile_options(cpp20_http_client PUBLIC /std:c++latest)
+#else ()
+#	target_compile_features(cpp20_http_client PUBLIC cxx_std_20)
+#endif ()
 
 target_include_directories(cpp20_http_client PUBLIC 
 	# When using the library from the install tree, relative paths can be used.

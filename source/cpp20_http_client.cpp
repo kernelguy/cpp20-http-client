@@ -22,16 +22,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include "cpp20_http_client.hpp"
-#include "Socket.hpp"
-#include "exceptions.hpp"
+#include <cpp20_http_client.hpp>
 
 //---------------------------------------------------------
 
 #include <cassert>
 #include <chrono>
 #include <cstring>
+#include <format>
 #include <system_error>
+#include <http_client/utils/UniqueHandle.hpp>
 
 using namespace std::chrono_literals;
 
@@ -64,7 +64,7 @@ using namespace std::chrono_literals;
 #	define IS_POSIX
 
 #	include <arpa/inet.h>
-#	include <errno.h>
+#	include <cerrno>
 #	include <fcntl.h>
 #	include <netdb.h>
 #	include <netinet/tcp.h>
@@ -78,7 +78,7 @@ using namespace std::chrono_literals;
 #	ifdef unix
 #		undef unix
 #	endif
-#endif // __has_include(<unistd.h>)
+#endif // _WIN32, __has_include(<unistd.h>)
 
 //---------------------------------------------------------
 
@@ -190,7 +190,7 @@ std::string get_openssl_error_string() {
 	auto buffer = static_cast<char*>(nullptr);
 	auto const length = ::BIO_get_mem_data(memory_file_handle.get(), &buffer);
 
-	return std::string(static_cast<char const*>(buffer), static_cast<std::string::size_type>(length));
+	return {static_cast<char const*>(buffer), static_cast<std::string::size_type>(length)};
 }
 
 } // namespace unix
@@ -219,7 +219,7 @@ void throw_connection_error(
 
 [[noreturn]]
 void throw_connection_error(std::string reason, int const error_code = errno, bool const is_tls_error = false) {
-	throw ConnectionFailed{
+	throw errors::ConnectionFailed{
 		std::format("{} with code {}: {}", reason, error_code, std::generic_category().message(error_code)), 
 		is_tls_error
 	};
@@ -1074,7 +1074,7 @@ private:
 	using AddressInfo = std::unique_ptr<addrinfo, decltype([](auto const p){freeaddrinfo(p);})>;
 
 	[[nodiscard]]
-	static AddressInfo get_address_info_(std::string const server, Port const port) {
+	static AddressInfo get_address_info_(const std::string &server, Port const port) {
 		auto const port_string = std::to_string(port);
 		auto const hints = addrinfo{
 			.ai_flags{},
@@ -1095,7 +1095,7 @@ private:
 				&address_info
 			))
 		{
-			throw ConnectionFailed{
+			throw errors::ConnectionFailed{
 				std::format("Failed to get address info for socket creation: {}", gai_strerror(result))
 			};
 		}
@@ -1221,7 +1221,7 @@ private:
 	using TlsConnection = std::unique_ptr<SSL, decltype([](auto const x){ ::SSL_free(x); })>;
 
 	static void throw_tls_error_() {
-		throw ConnectionFailed{utils::unix::get_openssl_error_string(), true};
+		throw errors::ConnectionFailed{utils::unix::get_openssl_error_string(), true};
 	}
 
 	void ensure_connected_() {
@@ -1248,7 +1248,7 @@ private:
 		SSL_CTX_set_read_ahead(tls_context_.get(), true);
 	}
 
-	void configure_tls_connection_(std::string const server, Port const port) {
+	void configure_tls_connection_(const std::string &server, Port const port) {
 		auto const host_name_c_string = server.data();
 
 		// For SNI (Server Name Identification)

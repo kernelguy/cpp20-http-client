@@ -24,37 +24,10 @@ SOFTWARE.
 
 #pragma once
 
-#include <algorithm>
-#include <array>
-#include <charconv>
-#include <chrono>
-#include <concepts>
-#include <format>
-#include <fstream>
-#include <functional>
-#include <future>
-#include <iostream>
-#include <memory>
-#include <ranges>
-#include <span>
-#include <stdexcept>
-#include <string>
-#include <string_view>
-#include <thread>
-#include <variant>
-
-#include <version>
-#include "ChunkyBodyParser.hpp"
-#include "Response.hpp"
-#include "ResponseProgress.hpp"
-#include "Request.hpp"
-#include "RequestMethod.hpp"
-#include "Protocol.hpp"
-#include "template-helpers.hpp"
-
-#ifdef __cpp_lib_source_location
-#	include <source_location>
-#endif
+#include "http_client/Response.hpp"
+#include "http_client/Request.hpp"
+#include "http_client/RequestMethod.hpp"
+#include "http_client/Protocol.hpp"
 
 /*
 Namespaces:
@@ -65,17 +38,3 @@ http_client {
 	algorithms
 }
 */
-
-namespace http_client {
-
-/*
-	This is everything that doesn't have anything to do with the core functionality, 
-	but are utilities that are used within the library.
-*/
-namespace utils {
-
-
-} // namespace utils
-
-
-} // namespace http_client

@@ -1,54 +1,17 @@
-/**
-* This Source Code Form is subject to the terms of the Mozilla Public
-* License, v. 2.0. If a copy of the MPL was not distributed with this
-* file, You can obtain one at https://mozilla.org/MPL/2.0/.
-*
-* \copyright   Copyright 2025 RSP Systems A/S. All rights reserved.
-* \license     Mozilla Public License 2.0
-* \author      steffen
-*/
 #ifndef CPP20HTTPCLIENT_SOURCE_CPP20_HTTP_CLIENT_CPP_TEMPLATE_HELPERS_HPP
 #define CPP20HTTPCLIENT_SOURCE_CPP20_HTTP_CLIENT_CPP_TEMPLATE_HELPERS_HPP
 
-#	include <openssl/ssl.h>
-#	include <openssl/err.h>
-#	include <unistd.h>
-#	include <sys/socket.h>
-#	include <netinet/tcp.h>
-#	include <netdb.h>
-#	include <fcntl.h>
-#	include <errno.h>
-#	include <arpa/inet.h>
-#include <system_error>
-#include <cstring>
-#include <cassert>
-#include "exceptions.hpp"
-#include "Socket.hpp"
-#include "Protocol.hpp"
-#include "RequestMethod.hpp"
-#include "Request.hpp"
-#include "ResponseProgress.hpp"
-#include "Response.hpp"
-#include "ChunkyBodyParser.hpp"
-#include <version>
-#include <variant>
-#include <thread>
-#include <string_view>
-#include <string>
-#include <stdexcept>
-#include <span>
-#include <ranges>
-#include <memory>
-#include <iostream>
-#include <future>
-#include <functional>
-#include <fstream>
+
 #include <format>
-#include <concepts>
-#include <chrono>
-#include <charconv>
-#include <array>
-#include <algorithm>
+#include <iostream>
+#include <fstream>
+#include <ranges>
+#include <vector>
+#include "../Protocol.hpp"
+
+#ifdef __cpp_lib_source_location
+#include <source_location>
+#endif
 
 namespace http_client::utils {
 
@@ -82,12 +45,29 @@ inline void panic(std::string_view const message)
     exit(1);
 }
 
+/*
+	IsAnyOf<T, U, V, W, ...> is true if T is the same type as one or more of U, V, W, ...
+*/
+template<typename T, typename ... U>
 concept IsAnyOf = (std::same_as<T, U> || ...);
-concept IsTrivial = std::is_trivial_v<T>;
-concept IsByte = IsAnyOf<std::remove_cvref_t<T>, std::byte, char, unsigned char>;
-concept IsInputRangeOf = std::ranges::input_range<Range_> && std::same_as<std::ranges::range_value_t<Range_>, Value_>;
-concept IsSizedRangeOf = IsInputRangeOf<Range_, Value_> && std::ranges::sized_range<Range_>;
 
+//---------------------------------------------------------
+
+template<typename T>
+concept IsTrivial = std::is_trivial_v<T>;
+
+/*
+	Aliasing with types for which IsByte is true is allowed and does not invoke undefined behavior.
+	https://en.cppreference.com/w/cpp/language/reinterpret_cast
+*/
+template<typename T>
+concept IsByte = IsAnyOf<std::remove_cvref_t<T>, std::byte, char, unsigned char>;
+
+template<typename Range_, typename Value_>
+concept IsInputRangeOf = std::ranges::input_range<Range_> && std::same_as<std::ranges::range_value_t<Range_>, Value_>;
+
+template<typename Range_, typename Value_>
+concept IsSizedRangeOf = IsInputRangeOf<Range_, Value_> && std::ranges::sized_range<Range_>;
 
 /*
 	This can be called when the program reaches a path that should never be reachable.
@@ -124,10 +104,6 @@ constexpr auto range_to_string_view = []<
             static_cast<std::string_view::size_type>(std::ranges::distance(range))
     };
 };
-
-//---------------------------------------------------------
-
-void enable_utf8_console();
 
 //---------------------------------------------------------
 
@@ -244,7 +220,7 @@ template<std::integral T>
 [[nodiscard]]
 std::optional<T> string_to_integral(std::string_view const string, int const base = 10)
 {
-    auto number_result = T{};
+    std::integral auto number_result = T{};
     if (std::from_chars(string.data(), string.data() + string.size(), number_result, base).ec == std::errc{}) {
         return number_result;
     }
@@ -278,6 +254,35 @@ constexpr auto ascii_lowercase_transform = std::views::transform([](char const c
 [[nodiscard]]
 constexpr bool equal_ascii_case_insensitive(std::string_view const lhs, std::string_view const rhs) noexcept {
     return std::ranges::equal(lhs | ascii_lowercase_transform, rhs | ascii_lowercase_transform);
+}
+
+
+/*
+	Returns the default port corresponding to the specified protocol.
+*/
+[[nodiscard]]
+constexpr Port default_port_for_protocol(Protocol const protocol) noexcept {
+    return static_cast<Port>(protocol);
+}
+
+[[nodiscard]]
+constexpr bool is_protocol_tls_encrypted(Protocol const protocol) noexcept {
+    return protocol == Protocol::Https;
+}
+
+/*
+	Returns the protocol that corresponds to the specified case-insensitive string.
+	For example, "http" converts to Protocol::Http.
+*/
+[[nodiscard]]
+constexpr Protocol get_protocol_from_string(std::string_view const protocol_string) noexcept {
+    if (equal_ascii_case_insensitive(protocol_string, "http")) {
+        return Protocol::Http;
+    }
+    else if (equal_ascii_case_insensitive(protocol_string, "https")) {
+        return Protocol::Https;
+    }
+    return Protocol::Unknown;
 }
 
 } // namespace http_client::utils

@@ -1,15 +1,13 @@
 #include <cpp20_http_client.hpp>
-#include "Response.hpp"
-#include "ResponseProgress.hpp"
 
 using namespace std::chrono_literals;
 
 int main() {
     auto response = http_client::get("https://www.youtube.com")
-        .set_raw_progress_callback([](http_client::ResponseProgressRaw const& progress) {
+        .set_raw_progress_callback([](http_client::algorithms::ResponseProgressRaw const& progress) {
             std::cout << "Got " << progress.data.size() << " bytes so far.\n";
         })
-        .set_headers_callback([](http_client::ResponseProgressHeaders& headers) {
+        .set_headers_callback([](http_client::algorithms::ResponseProgressHeaders& headers) {
             std::cout << "Got headers.\n";
             
             std::cout << "Status code: " << static_cast<int>(headers.get_status_code()) << '\n';
