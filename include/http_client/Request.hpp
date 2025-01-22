@@ -76,7 +76,7 @@ public:
     */
     template<IsHeader ... Header_>
     [[nodiscard]]
-    Request &&add_headers(Header_ &&... p_headers) &&
+    Request&& add_headers(Header_ &&... p_headers) &&
     {
         auto const headers = std::array{Header{p_headers}...};
         return std::move(*this).add_headers(std::span{headers});

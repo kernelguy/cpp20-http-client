@@ -20,13 +20,7 @@ namespace http_client::utils {
 	but are utilities that are used within the library.
 */
 
-void enable_utf8_console()
-{
-#ifdef _WIN32
-    SetConsoleOutputCP(CP_UTF8);
-#endif
-    // Pretty much everyone else uses utf-8 by default.
-}
+void enable_utf8_console();
 
 [[noreturn]]
 inline void unreachable()

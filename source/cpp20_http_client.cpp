@@ -67,7 +67,6 @@ using namespace std::chrono_literals;
 #	include <cerrno>
 #	include <fcntl.h>
 #	include <netdb.h>
-#	include <netinet/tcp.h>
 #	include <sys/socket.h>
 #	include <unistd.h>
 
@@ -86,6 +85,14 @@ namespace http_client {
 
 // Platform-specific utilities.
 namespace utils {
+
+void enable_utf8_console()
+{
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+    // Pretty much everyone else uses utf-8 by default.
+}
 
 #ifdef _WIN32
 namespace win {
@@ -1209,7 +1216,7 @@ public:
 			default:
 				utils::throw_connection_error("Failed to read available data from socket", error_code);
 		}
-		utils::unreachable();
+		utils::unreachable(); // NOLINT
 	}
 
 	TlsSocket(std::string_view const server, Port const port) {

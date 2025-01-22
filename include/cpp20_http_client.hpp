@@ -28,6 +28,7 @@ SOFTWARE.
 #include "http_client/Request.hpp"
 #include "http_client/RequestMethod.hpp"
 #include "http_client/Protocol.hpp"
+#include "http_client/Socket.hpp"
 
 /*
 Namespaces:

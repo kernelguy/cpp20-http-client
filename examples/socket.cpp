@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include <cpp20_http_client.hpp>
-#include "Socket.hpp"
 
 /*
 	This example is only meant to compile and demonstrate the socket abstraction.
