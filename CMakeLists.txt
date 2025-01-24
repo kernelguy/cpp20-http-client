@@ -14,7 +14,10 @@ set (CMAKE_CXX_STANDARD 23)
 #-----------------------------
 # Library target.
 
-add_library(cpp20_http_client STATIC source/cpp20_http_client.cpp)
+add_library(cpp20_http_client STATIC
+		source/cpp20_http_client.cpp
+		source/Socket.cpp
+)
 add_library(Cpp20HttpClient::cpp20_http_client ALIAS cpp20_http_client)
 
 set_target_properties(cpp20_http_client PROPERTIES CXX_EXTENSIONS OFF)
