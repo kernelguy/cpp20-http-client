@@ -1,7 +1,6 @@
 
 #include <cassert>
 #include <chrono>
-#include <cstring>
 #include <format>
 #include <system_error>
 #include <http_client/utils/UniqueHandle.hpp>
